@@ -8,7 +8,12 @@
       "Bash(source:*)",
       "Bash(grep:*)",
       "Bash(chmod:*)",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(ruff check:*)",
+      "Bash(ruff format:*)",
+      "Bash(touch:*)",
+      "Bash(pytest:*)",
+      "Bash(ls:*)"
     ],
     "deny": []
   }

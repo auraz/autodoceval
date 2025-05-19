@@ -22,27 +22,25 @@ AutoDocEval can be used as a command-line tool or as a Python library.
 
 ```bash
 # Evaluate document clarity
-autodoceval grade docs/sample.md
+autodoceval grade autodoceval/examples/example_doc.md
 
 # Generate improved documentation
-autodoceval improve docs/sample.md
+autodoceval improve autodoceval/examples/example_doc.md
 
 # Compare original and improved documents
-autodoceval compare docs/sample.md docs/sample_improved.md
+autodoceval compare autodoceval/examples/example_doc.md autodoceval/examples/example_doc_improved.md
 
 # Run auto-improvement loop until 70% quality or 3 iterations max
-autodoceval auto-improve docs/sample.md
+autodoceval auto-improve autodoceval/examples/example_doc.md
 ```
 
 ### Python Library
 
 ```python
-from autodoceval.evaluator import evaluate_document
-from autodoceval.improver import improve_document
-from autodoceval.auto_improve import auto_improve_document
+from autodoceval import evaluate_document, improve_document, auto_improve_document
 
 # Evaluate a document
-with open("docs/sample.md", "r") as f:
+with open("autodoceval/examples/example_doc.md", "r") as f:
     doc_content = f.read()
 score, feedback = evaluate_document(doc_content)
 
@@ -51,7 +49,7 @@ improved_doc = improve_document(doc_content, feedback)
 
 # Auto-improve with custom parameters
 auto_improve_document(
-    "docs/sample.md",
+    "autodoceval/examples/example_doc.md",
     max_iterations=5,
     target_score=0.8  # 80% quality target
 )
@@ -69,7 +67,31 @@ python -m venv venv
 source venv/bin/activate
 
 # Install in development mode
-pip install -e '.[dev]'
+pip install -e ".[dev]"
+```
+
+### Invoke Tasks
+
+The project uses [Invoke](https://www.pyinvoke.org/) for task automation:
+
+```bash
+# Run full cycle (grade and improve)
+invoke all
+
+# Individual tasks
+invoke grade --file=autodoceval/examples/example_doc.md
+invoke improve --file=autodoceval/examples/example_doc.md
+invoke compare --original=autodoceval/examples/example_doc.md --improved=autodoceval/examples/example_doc_improved.md
+invoke auto-improve --file=autodoceval/examples/example_doc.md --iterations=3 --target=0.7
+
+# Development tasks
+invoke clean         # Clean up generated files
+invoke format        # Format code with ruff
+invoke check-format  # Check formatting without making changes
+invoke lint          # Run linter (ruff)
+invoke test          # Run tests
+invoke build         # Build package for distribution
+invoke publish       # Publish package to PyPI
 ```
 
 ## License
