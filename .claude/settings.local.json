@@ -5,7 +5,10 @@
       "Bash(find:*)",
       "Bash(python:*)",
       "Bash(pip install:*)",
-      "Bash(source:*)"
+      "Bash(source:*)",
+      "Bash(grep:*)",
+      "Bash(chmod:*)",
+      "Bash(rm:*)"
     ],
     "deny": []
   }

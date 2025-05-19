@@ -1,20 +1,29 @@
 [build-system]
-requires = ["setuptools>=42", "wheel"]
+requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "autodoceval"
 version = "0.1.0"
 description = "Document evaluation in closed-loop autocycle using OpenAI evaluation framework"
-author = "User"
+authors = [{ name = "Oleksandr Kryklia", email = "kryklia@gmail.com" }]
+readme = "README.md"
+license = { text = "MIT" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Topic :: Documentation",
+    "Topic :: Software Development :: Documentation",
+]
 requires-python = ">=3.9"
 dependencies = [
     "openai>=1.0.0",
+    "deepeval>=0.20.0",
     "pydantic>=2.0.0",
-    "numpy",
-    "pandas",
-    "tqdm",
-    "matplotlib"
+    "typing-extensions>=4.0.0",
 ]
 
 [project.optional-dependencies]
@@ -23,14 +32,13 @@ dev = [
     "black",
     "isort",
     "mypy",
-    "ruff"
+    "ruff",
+    "build",
+    "twine"
 ]
 
-[tool.black]
-line-length = 100
-
-[tool.isort]
-profile = "black"
+[project.scripts]
+autodoceval = "autodoceval.cli:main"
 
 [tool.ruff]
-line-length = 100
+line-length = 200

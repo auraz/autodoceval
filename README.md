@@ -1,49 +1,77 @@
-# AutoDocEval - Documentation Evaluation and Improvement
+# AutoDocEval
 
-This project provides a closed-loop system for evaluating and improving documentation using AI models.
+A closed-loop system for evaluating and improving documentation using AI models.
 
 ## Installation
 
 ```bash
-# Create and activate a virtual environment (recommended)
-python -m venv venv
-source venv/bin/activate
-
-# Install dependencies
-pip install deepeval openai
+pip install autodoceval
 ```
 
-## Usage
-
-The project uses a Makefile to simplify the workflow:
-
-```bash
-# Run the full documentation evaluation and improvement cycle
-make
-
-# Run with a specific documentation file
-make FILE=docs/your_file.md
-
-# Run individual steps
-make generate  # Generate Q&A pairs for evaluation
-make grade     # Evaluate documentation
-make improve   # Generate improved documentation
-
-# Clean up generated files
-make clean
-```
-
-## Environment Variables
-
-Make sure to set your OpenAI API key:
+Ensure you have your OpenAI API key set in your environment:
 
 ```bash
 export OPENAI_API_KEY=your_api_key_here
 ```
 
-## Process
+## Usage
 
-1. Generate Q&A pairs from documentation
-2. Evaluate documentation clarity
-3. Generate improved documentation based on feedback
-4. The improved documentation is saved as `*_improved.md`
+AutoDocEval can be used as a command-line tool or as a Python library.
+
+### Command-line Interface
+
+```bash
+# Evaluate document clarity
+autodoceval grade docs/sample.md
+
+# Generate improved documentation
+autodoceval improve docs/sample.md
+
+# Compare original and improved documents
+autodoceval compare docs/sample.md docs/sample_improved.md
+
+# Run auto-improvement loop until 70% quality or 3 iterations max
+autodoceval auto-improve docs/sample.md
+```
+
+### Python Library
+
+```python
+from autodoceval.evaluator import evaluate_document
+from autodoceval.improver import improve_document
+from autodoceval.auto_improve import auto_improve_document
+
+# Evaluate a document
+with open("docs/sample.md", "r") as f:
+    doc_content = f.read()
+score, feedback = evaluate_document(doc_content)
+
+# Improve a document
+improved_doc = improve_document(doc_content, feedback)
+
+# Auto-improve with custom parameters
+auto_improve_document(
+    "docs/sample.md",
+    max_iterations=5,
+    target_score=0.8  # 80% quality target
+)
+```
+
+## Development
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/autodoceval.git
+cd autodoceval
+
+# Create and activate a virtual environment
+python -m venv venv
+source venv/bin/activate
+
+# Install in development mode
+pip install -e '.[dev]'
+```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.

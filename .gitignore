@@ -19,6 +19,7 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+MANIFEST
 
 # Virtual environments
 venv/
@@ -27,9 +28,9 @@ ENV/
 .env
 
 # Generated files
-data/
 results/
 docs/*_improved.md
+docs/*_iter*.md
 
 # IDE files
 .idea/

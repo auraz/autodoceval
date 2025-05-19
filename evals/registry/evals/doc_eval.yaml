@@ -1,6 +1,0 @@
-# ---
-id: evals/doc_eval
-description: QA on documentation
-metrics: [accuracy]
-eval_type: simple
-data_path: ../data/questions.jsonl

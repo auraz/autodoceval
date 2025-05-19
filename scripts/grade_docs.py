@@ -1,65 +1,52 @@
 import os
-import re
-import sys
+from typing import Dict, Optional
 
-from deepeval.test_case import LLMTestCase
-from openai import OpenAI
+from deepeval.metrics import GEval
+from deepeval.test_case import LLMTestCase, LLMTestCaseParams
+from file_tools import get_derived_paths, get_input_path, read_file, write_file
 
-# Set up OpenAI client
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+os.environ["OPENAI_API_KEY"] = os.getenv("OPENAI_API_KEY")
 
-# Get input file from command line or use default
-base_dir = os.path.dirname(__file__)
-doc_path = sys.argv[1] if len(sys.argv) > 1 else os.path.join(base_dir, "..", "docs", "sample.md")
-# Make path absolute if it's not already
-if not os.path.isabs(doc_path):
-    doc_path = os.path.abspath(doc_path)
 
-if not os.path.exists(doc_path):
-    raise FileNotFoundError(f"Missing documentation input file: {doc_path}")
+def setup_evaluator() -> GEval:
+    """Creates and configures the GEval evaluator."""
+    return GEval(name="Clarity", criteria="clarity", evaluation_params=[LLMTestCaseParams.INPUT, LLMTestCaseParams.ACTUAL_OUTPUT])
 
-# Determine output path based on input filename
-filename = os.path.basename(doc_path).split(".")[0]
-results_path = os.path.join(base_dir, "..", "results", f"{filename}_scores.json")
 
-# Define evaluation criteria and prompt
-criteria = "clarity"
-prompt = f"Rate this documentation for {criteria} on a scale from 0 to 10 and provide an explanation."
+def evaluate_document(evaluator: GEval, doc_content: str, doc_path: str) -> GEval:
+    """Evaluates a document for clarity and prints results."""
+    print(f"📝 Grading document: {doc_path}")
+    test_case = LLMTestCase(input="Evaluate for clarity", actual_output=doc_content)
+    evaluator.measure(test_case)
+    
+    score = evaluator.score
+    print("Score:", score)
+    print("Reasoning:", evaluator.reason)
+    
+    if score <= 0.2:
+        interpretation = "very poor clarity and requires a thorough rewrite."
+    elif score <= 0.4:
+        interpretation = "poor clarity and needs significant improvements."
+    elif score <= 0.6:
+        interpretation = "fair clarity but can be improved."
+    elif score <= 0.8:
+        interpretation = "good clarity with minor improvements needed."
+    else:
+        interpretation = "excellent clarity with very minor or no changes needed."
+    print(interpretation)
+    return evaluator
 
-# Load documentation content
-with open(doc_path) as f:
-    doc = f.read()
 
-# Create full prompt for evaluation
-evaluation_prompt = f"""
-{prompt}
+if __name__ == "__main__":
+    doc_path = get_input_path()
 
-Documentation:
-{doc}
+    if not os.path.exists(doc_path):
+        raise FileNotFoundError(f"Missing documentation input file: {doc_path}")
 
-Please provide your rating (0-10) and a detailed explanation of your reasoning.
-"""
+    paths = get_derived_paths(doc_path)
+    results_path = paths["results_path"]
 
-# Call OpenAI API directly for evaluation
-response = client.chat.completions.create(model="gpt-4", messages=[{"role": "user", "content": evaluation_prompt}])
-evaluation_text = response.choices[0].message.content
-
-# Parse score and explanation
-# Typically the score will be at the beginning of the response
-score_match = re.search(r"(\d+(\.\d+)?)", evaluation_text)
-score = float(score_match.group(1)) if score_match else 5.0  # Default to middle score if parsing fails
-reasoning = evaluation_text
-
-# Create a test case object to maintain compatibility
-test_case = LLMTestCase(input=prompt, actual_output=doc)
-test_case.score = score
-test_case.reasoning = reasoning
-
-# Print the evaluation results
-print("Score:", test_case.score)
-print("Explanation:", test_case.reasoning)
-
-# Save reasoning for improvement step
-os.makedirs(os.path.dirname(results_path), exist_ok=True)
-with open(results_path, "w") as f:
-    f.write(test_case.reasoning)
+    doc = read_file(doc_path)
+    evaluator = setup_evaluator()
+    evaluator = evaluate_document(evaluator, doc, doc_path)
+    write_file(results_path, evaluator.reason)
